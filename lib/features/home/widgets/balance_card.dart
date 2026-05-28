@@ -15,6 +15,9 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasMovements = summary.income > 0 || summary.expenses > 0;
+    final status = _statusFor(summary.balance, hasMovements);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
       decoration: BoxDecoration(
@@ -75,31 +78,23 @@ class BalanceCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _BalancePill(
-                label: 'Ingresos',
-                value: summary.income,
-                icon: Icons.trending_up,
-              ),
-              _BalancePill(
-                label: 'Gastos',
-                value: summary.expenses,
-                icon: Icons.trending_down,
-              ),
-            ],
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Resumen de este mes',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.82),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              const Icon(Icons.check_circle_outline, color: Colors.white),
+              Icon(status.icon, color: Colors.white, size: 22),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  summary.message,
+                  status.message,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,
@@ -113,43 +108,32 @@ class BalanceCard extends StatelessWidget {
       ),
     );
   }
-}
 
-class _BalancePill extends StatelessWidget {
-  const _BalancePill({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
+  _BalanceStatus _statusFor(double balance, bool hasMovements) {
+    if (!hasMovements) {
+      return const _BalanceStatus(
+        Icons.add_circle_outline,
+        'Agrega tu primer movimiento',
+      );
+    }
 
-  final String label;
-  final double value;
-  final IconData icon;
+    if (balance < 0) {
+      return const _BalanceStatus(
+        Icons.warning_amber_rounded,
+        'Tus gastos superan tus ingresos',
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.16)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 17),
-          const SizedBox(width: 6),
-          Text(
-            '$label ${CurrencyFormatter.format(value)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
+    return const _BalanceStatus(
+      Icons.check_circle_outline,
+      'Vas bien este mes',
     );
   }
+}
+
+class _BalanceStatus {
+  const _BalanceStatus(this.icon, this.message);
+
+  final IconData icon;
+  final String message;
 }
