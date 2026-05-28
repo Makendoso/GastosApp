@@ -9,6 +9,7 @@ import 'widgets/category_breakdown_section.dart';
 import 'widgets/expense_evolution_card.dart';
 import 'widgets/period_selector.dart';
 import 'widgets/statistics_header.dart';
+import 'widgets/statistics_overview_card.dart';
 
 class StatisticsScreen extends ConsumerWidget {
   const StatisticsScreen({super.key});
@@ -19,6 +20,8 @@ class StatisticsScreen extends ConsumerWidget {
     final summary = ref.watch(financialSummaryProvider);
     final movements = ref.watch(movementsProvider);
     final categories = ref.watch(categoriesProvider);
+    final overview = ref.watch(statisticsOverviewProvider);
+    final evolution = ref.watch(expenseEvolutionProvider);
 
     return Scaffold(
       bottomNavigationBar: const AppBottomNavigation(selectedIndex: 2),
@@ -35,12 +38,17 @@ class StatisticsScreen extends ConsumerWidget {
                 ],
                 const PeriodSelector(),
                 const SizedBox(height: AppSpacing.lg),
+                StatisticsOverviewCard(overview: overview),
+                const SizedBox(height: AppSpacing.lg),
                 CategoryBreakdownSection(
                   summary: summary,
                   categories: categories,
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const ExpenseEvolutionCard(),
+                ExpenseEvolutionCard(
+                  points: evolution,
+                  month: DateTime.now(),
+                ),
               ],
             ),
     );

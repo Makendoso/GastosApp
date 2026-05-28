@@ -59,6 +59,65 @@ final financialSummaryProvider = Provider<FinancialSummary>((ref) {
   return ref.watch(financeControllerProvider).summary;
 });
 
+final statisticsOverviewProvider = Provider<StatisticsOverview>((ref) {
+  final movements = ref.watch(movementsProvider);
+  final summary = ref.watch(financialSummaryProvider);
+  final now = DateTime.now();
+  final previousMonth = DateTime(now.year, now.month - 1);
+
+  final previousMonthExpenses = movements
+      .where(
+        (movement) =>
+            movement.isExpense &&
+            movement.date.year == previousMonth.year &&
+            movement.date.month == previousMonth.month,
+      )
+      .fold(0.0, (total, movement) => total + movement.amount.abs());
+
+  final topCategoryEntry = summary.expenseByCategory.entries.isEmpty
+      ? null
+      : (summary.expenseByCategory.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
+          .first;
+
+  return StatisticsOverview(
+    currentMonthExpenses: summary.monthExpenses,
+    previousMonthExpenses: previousMonthExpenses,
+    dailyAverage: now.day == 0 ? 0 : summary.monthExpenses / now.day,
+    topCategoryName: topCategoryEntry?.key,
+    topCategoryAmount: topCategoryEntry?.value ?? 0,
+  );
+});
+
+final expenseEvolutionProvider = Provider<List<ExpenseEvolutionPoint>>((ref) {
+  final movements = ref.watch(movementsProvider);
+  final now = DateTime.now();
+  final dailyExpenses = <int, double>{};
+
+  for (final movement in movements) {
+    if (!movement.isExpense ||
+        movement.date.year != now.year ||
+        movement.date.month != now.month) {
+      continue;
+    }
+
+    dailyExpenses.update(
+      movement.date.day,
+      (total) => total + movement.amount.abs(),
+      ifAbsent: () => movement.amount.abs(),
+    );
+  }
+
+  var runningTotal = 0.0;
+  return [
+    for (var day = 1; day <= now.day; day++)
+      ExpenseEvolutionPoint(
+        day: day,
+        amount: runningTotal += dailyExpenses[day] ?? 0,
+      ),
+  ];
+});
+
 final historyFilterProvider = StateProvider<HistoryFilterState>((ref) {
   return const HistoryFilterState();
 });
@@ -246,6 +305,58 @@ class CategoryState {
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
+}
+
+class StatisticsOverview {
+  const StatisticsOverview({
+    required this.currentMonthExpenses,
+    required this.previousMonthExpenses,
+    required this.dailyAverage,
+    required this.topCategoryName,
+    required this.topCategoryAmount,
+  });
+
+  final double currentMonthExpenses;
+  final double previousMonthExpenses;
+  final double dailyAverage;
+  final String? topCategoryName;
+  final double topCategoryAmount;
+
+  double get monthlyDifference => currentMonthExpenses - previousMonthExpenses;
+
+  bool get hasCurrentExpenses => currentMonthExpenses > 0;
+
+  bool get hasPreviousExpenses => previousMonthExpenses > 0;
+
+  String get insight {
+    if (!hasCurrentExpenses) {
+      return 'Aun no hay gastos este mes. Registra movimientos para ver tendencias.';
+    }
+
+    if (!hasPreviousExpenses) {
+      return 'Este mes ya tiene gastos registrados; el siguiente mes podras comparar mejor.';
+    }
+
+    if (monthlyDifference > 0) {
+      return 'Tus gastos van por encima del mes anterior. Conviene revisar los rubros principales.';
+    }
+
+    if (monthlyDifference < 0) {
+      return 'Vas gastando menos que el mes anterior. Buen avance para mantener el ritmo.';
+    }
+
+    return 'Tus gastos van iguales al mes anterior. Mantente atento a los proximos dias.';
+  }
+}
+
+class ExpenseEvolutionPoint {
+  const ExpenseEvolutionPoint({
+    required this.day,
+    required this.amount,
+  });
+
+  final int day;
+  final double amount;
 }
 
 class CategoryController extends StateNotifier<CategoryState> {
