@@ -41,8 +41,10 @@ class HomeScreen extends ConsumerWidget {
       body: financeState.isLoading && movements.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : financeState.errorMessage != null && movements.isEmpty
-              ? _HomeMessage(
-                  message: financeState.errorMessage!,
+              ? const _HomeMessage(
+                  message:
+                      'No se pudieron cargar tus movimientos. Tus datos locales '
+                      'se mantienen guardados; intenta cerrar y abrir la app.',
                   icon: Icons.error_outline,
                 )
               : ListView(

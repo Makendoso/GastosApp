@@ -33,7 +33,16 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
-      onCreate: (migrator) => migrator.createAll(),
+      onCreate: (migrator) async {
+        await migrator.createAll();
+      },
+      onUpgrade: (migrator, from, to) async {
+        await transaction(() async {
+          if (from < 1) {
+            await migrator.createTable(movements);
+          }
+        });
+      },
     );
   }
 
