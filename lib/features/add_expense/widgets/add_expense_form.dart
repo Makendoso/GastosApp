@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/formatters/currency_formatter.dart';
 import '../../../core/formatters/date_formatter.dart';
-import '../../../data/models/finance_category.dart';
+import '../../../data/models/category.dart';
 import '../../../data/models/movement.dart';
 import 'category_dropdown.dart';
 import 'date_picker_tile.dart';
@@ -18,7 +18,7 @@ class AddExpenseForm extends StatefulWidget {
     super.key,
   });
 
-  final List<FinanceCategory> categories;
+  final List<Category> categories;
   final Future<void> Function(Movement movement) onSave;
   final Movement? initialMovement;
 
@@ -31,7 +31,7 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
   late final TextEditingController _amountController;
   late final TextEditingController _noteController;
 
-  late FinanceCategory _selectedCategory;
+  late Category _selectedCategory;
   late DateTime _selectedDate;
   late bool _isExpense;
   bool _isSaving = false;
@@ -64,10 +64,12 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
     super.dispose();
   }
 
-  List<FinanceCategory> get _availableCategories {
-    return widget.categories.isEmpty
-        ? FinanceCategory.defaults
-        : widget.categories;
+  List<Category> get _availableCategories {
+    final expenseCategories = widget.categories
+        .where((category) => category.supports(MovementType.expense))
+        .toList(growable: false);
+
+    return expenseCategories.isEmpty ? Category.defaults : expenseCategories;
   }
 
   String? _initialNoteFrom(Movement? movement) {

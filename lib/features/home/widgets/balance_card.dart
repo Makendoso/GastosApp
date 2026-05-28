@@ -15,20 +15,30 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+    final hasMovements = summary.income > 0 || summary.expenses > 0;
+    final status = _statusFor(summary.balance, hasMovements);
+
+    final isNegative = summary.balance < 0;
+    final colors = isNegative
+        ? const [Color(0xFFDC2626), Color(0xFF991B1B)]
+        : const [Color(0xFF16A34A), AppColors.primary];
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF55D98A), Color(0xFF34B56B)],
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: colors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.25),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withOpacity(0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -42,37 +52,86 @@ class BalanceCard extends StatelessWidget {
                 'Saldo actual',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              Icon(
-                Icons.visibility_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 36,
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: Colors.white.withOpacity(0.95),
+                  size: 25,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            CurrencyFormatter.format(summary.balance),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 42,
-              fontWeight: FontWeight.w700,
+          const SizedBox(height: AppSpacing.xs),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              CurrencyFormatter.format(summary.balance),
+              maxLines: 1,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 42,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            '${summary.message} 👍',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Icon(status.icon, color: Colors.white, size: 22),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  status.message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+
+  _BalanceStatus _statusFor(double balance, bool hasMovements) {
+    if (!hasMovements) {
+      return const _BalanceStatus(
+        Icons.add_circle_outline,
+        'Agrega tu primer movimiento',
+      );
+    }
+
+    if (balance < 0) {
+      return const _BalanceStatus(
+        Icons.warning_amber_rounded,
+        'Tus gastos superan tus ingresos',
+      );
+    }
+
+    return const _BalanceStatus(
+      Icons.check_circle_outline,
+      'Vas bien este mes',
+    );
+  }
+}
+
+class _BalanceStatus {
+  const _BalanceStatus(this.icon, this.message);
+
+  final IconData icon;
+  final String message;
 }

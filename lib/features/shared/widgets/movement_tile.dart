@@ -19,22 +19,22 @@ class MovementTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final amountColor =
         movement.isExpense ? AppColors.expense : AppColors.income;
-    final iconColor = _iconColor(movement.title);
+    final iconColor = _iconColor(movement.category);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Container(
-            width: 58,
-            height: 58,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: iconColor,
+              color: iconColor.withOpacity(0.14),
               shape: BoxShape.circle,
             ),
-            child: Icon(movement.icon, color: Colors.white, size: 31),
+            child: Icon(movement.icon, color: iconColor, size: 25),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,47 +45,56 @@ class MovementTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Color(0xFF111827),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  movement.isExpense ? 'Gasto' : 'Ingreso',
+                  movement.isExpense ? movement.category : 'Ingreso',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Color(0xFF6B7280),
-                    fontSize: 15,
+                    fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${movement.isExpense ? '-' : '+'} '
-                '${CurrencyFormatter.format(movement.amount.abs())}',
-                style: TextStyle(
-                  color: amountColor,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
+          const SizedBox(width: 10),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${movement.isExpense ? '-' : '+'} '
+                    '${CurrencyFormatter.format(movement.amount.abs())}',
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: amountColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                showDate
-                    ? DateFormatter.short(movement.date)
-                    : DateFormatter.dayMonth(movement.date),
-                style: const TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 6),
+                Text(
+                  showDate
+                      ? DateFormatter.short(movement.date)
+                      : DateFormatter.dayMonth(movement.date),
+                  style: const TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

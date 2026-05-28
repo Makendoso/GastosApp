@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/models/finance_category.dart';
+import '../../../data/models/category.dart';
 
 class CategorySelector extends StatelessWidget {
   const CategorySelector({
@@ -10,9 +10,9 @@ class CategorySelector extends StatelessWidget {
     super.key,
   });
 
-  final List<FinanceCategory> categories;
-  final FinanceCategory value;
-  final ValueChanged<FinanceCategory> onChanged;
+  final List<Category> categories;
+  final Category value;
+  final ValueChanged<Category> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class _CategoryOption extends StatelessWidget {
     required this.onTap,
   });
 
-  final FinanceCategory category;
+  final Category category;
   final bool isSelected;
   final VoidCallback onTap;
 

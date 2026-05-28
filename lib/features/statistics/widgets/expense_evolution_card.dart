@@ -1,17 +1,20 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+
 class ExpenseEvolutionCard extends StatelessWidget {
   const ExpenseEvolutionCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -22,28 +25,17 @@ class ExpenseEvolutionCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
-              const Expanded(
+              Icon(Icons.show_chart, color: AppColors.info),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(
                 child: Text(
                   'Evolucion de gastos',
                   style: TextStyle(
-                    color: Color(0xFF111827),
+                    color: AppColors.text,
                     fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () {},
-                iconAlignment: IconAlignment.end,
-                icon: const Icon(Icons.keyboard_arrow_down, size: 22),
-                label: const Text('Este mes'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF374151),
-                  textStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -63,7 +55,7 @@ class ExpenseEvolutionCard extends StatelessWidget {
                   horizontalInterval: 250,
                   getDrawingHorizontalLine: (_) {
                     return const FlLine(
-                      color: Color(0xFFE5E7EB),
+                      color: AppColors.border,
                       strokeWidth: 1,
                     );
                   },
@@ -84,7 +76,7 @@ class ExpenseEvolutionCard extends StatelessWidget {
                         return Text(
                           _moneyLabel(value),
                           style: const TextStyle(
-                            color: Color(0xFF6B7280),
+                            color: AppColors.textMuted,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -111,7 +103,7 @@ class ExpenseEvolutionCard extends StatelessWidget {
                           child: Text(
                             labels[value.toInt()] ?? '',
                             style: const TextStyle(
-                              color: Color(0xFF6B7280),
+                              color: AppColors.textMuted,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -138,14 +130,14 @@ class ExpenseEvolutionCard extends StatelessWidget {
                     ],
                     isCurved: true,
                     curveSmoothness: 0.28,
-                    color: const Color(0xFF19B86D),
+                    color: AppColors.info,
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: FlDotData(
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
                           radius: 4.5,
-                          color: const Color(0xFF19B86D),
+                          color: AppColors.info,
                           strokeColor: Colors.white,
                           strokeWidth: 2,
                         );
@@ -155,8 +147,8 @@ class ExpenseEvolutionCard extends StatelessWidget {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          const Color(0xFF19B86D).withOpacity(0.26),
-                          const Color(0xFF19B86D).withOpacity(0.02),
+                          AppColors.info.withOpacity(0.20),
+                          AppColors.info.withOpacity(0.02),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

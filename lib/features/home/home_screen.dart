@@ -6,8 +6,10 @@ import '../../data/providers/finance_providers.dart';
 import '../shared/widgets/app_bottom_navigation.dart';
 import 'widgets/balance_card.dart';
 import 'widgets/home_header.dart';
+import 'widgets/monthly_budget_card.dart';
 import 'widgets/recent_movements_section.dart';
 import 'widgets/summary_cards_row.dart';
+import 'widgets/weekly_chart.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -17,24 +19,24 @@ class HomeScreen extends ConsumerWidget {
     final financeState = ref.watch(financeControllerProvider);
     final summary = ref.watch(financialSummaryProvider);
     final movements = ref.watch(movementsProvider);
+    final budgetState = ref.watch(budgetControllerProvider);
+    final budget = ref.watch(monthlyBudgetProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        toolbarHeight: 88,
+        toolbarHeight: 64,
         leading: IconButton(
           tooltip: 'Menu',
           onPressed: () {},
-          icon: const Icon(Icons.menu, size: 36),
+          icon: const Icon(Icons.menu, size: 28),
         ),
         actions: [
-          const SizedBox(width: AppSpacing.md),
           IconButton(
             tooltip: 'Notificaciones',
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none, size: 34),
+            icon: const Icon(Icons.notifications_none, size: 26),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
       bottomNavigationBar: const AppBottomNavigation(selectedIndex: 0),
@@ -48,18 +50,33 @@ class HomeScreen extends ConsumerWidget {
                   icon: Icons.error_outline,
                 )
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(22, 0, 22, 24),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   children: [
                     const HomeHeader(userName: 'Andres'),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: AppSpacing.md),
                     if (financeState.errorMessage != null) ...[
                       _InlineError(message: financeState.errorMessage!),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
                     BalanceCard(summary: summary),
-                    const SizedBox(height: 30),
-                    SummaryCardsRow(summary: summary),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.md),
+                    SummaryCardsRow(
+                      summary: summary,
+                      budget: budget,
+                      movements: movements,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    if (budgetState.errorMessage != null) ...[
+                      _InlineError(message: budgetState.errorMessage!),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    MonthlyBudgetCard(
+                      budget: budget,
+                      summary: summary,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    WeeklyChart(movements: movements),
+                    const SizedBox(height: AppSpacing.md),
                     RecentMovementsSection(
                       movements: financeState.recentMovements,
                     ),

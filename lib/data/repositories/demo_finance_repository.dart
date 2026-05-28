@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../models/finance_category.dart';
+import '../models/category.dart';
 import '../models/financial_summary.dart';
 import '../models/movement.dart';
 
@@ -57,26 +57,26 @@ abstract final class DemoFinanceRepository {
     ),
   ];
 
-  static const categories = <FinanceCategory>[
-    FinanceCategory(
+  static const categories = <Category>[
+    Category(
       id: 'comida',
       name: 'Comida',
       icon: Icons.fastfood,
       color: Color(0xFFF97316),
     ),
-    FinanceCategory(
+    Category(
       id: 'transporte',
       name: 'Transporte',
       icon: Icons.directions_bus,
       color: Color(0xFF2563EB),
     ),
-    FinanceCategory(
+    Category(
       id: 'entretenimiento',
       name: 'Entretenimiento',
       icon: Icons.sports_esports,
       color: Color(0xFF7C3AED),
     ),
-    FinanceCategory(
+    Category(
       id: 'servicios',
       name: 'Servicios',
       icon: Icons.receipt_long,
