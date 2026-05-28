@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/formatters/date_formatter.dart';
+import '../../../data/models/category.dart';
 import '../../../data/models/movement.dart';
 import 'category_dropdown.dart';
 import 'date_picker_tile.dart';
@@ -15,7 +16,7 @@ class AddExpenseForm extends StatefulWidget {
     super.key,
   });
 
-  final List<String> categories;
+  final List<Category> categories;
   final Future<void> Function(Movement movement) onSave;
   final Movement? initialMovement;
 
@@ -45,10 +46,12 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
     _noteController = TextEditingController(text: movement?.note);
     _isExpense = movement?.isExpense ?? true;
     final initialCategory = movement?.category;
-    _selectedCategory =
-        initialCategory == null || !widget.categories.contains(initialCategory)
-            ? widget.categories.first
-            : initialCategory;
+    final categoryNames = _expenseCategories.map((category) => category.name);
+    _selectedCategory = initialCategory == null ||
+            initialCategory.trim().isEmpty ||
+            !categoryNames.contains(initialCategory)
+        ? _expenseCategories.first.name
+        : initialCategory;
     _selectedDate = movement?.date ?? DateTime.now();
   }
 
@@ -126,6 +129,39 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
     Navigator.pop(context);
   }
 
+  List<Category> get _expenseCategories {
+    final categories = [
+      for (final category in widget.categories)
+        if (category.supports(MovementType.expense)) category,
+    ];
+
+    if (categories.isEmpty) {
+      return Category.defaults;
+    }
+
+    final initialCategory = widget.initialMovement?.category;
+    final hasInitialCategory = initialCategory != null &&
+        categories.any((category) => category.name == initialCategory);
+
+    if (initialCategory == null ||
+        initialCategory.trim().isEmpty ||
+        hasInitialCategory ||
+        widget.initialMovement?.type != MovementType.expense) {
+      return categories;
+    }
+
+    return [
+      ...categories,
+      Category(
+        id: 'legacy-${initialCategory.toLowerCase().replaceAll(' ', '-')}',
+        name: initialCategory,
+        icon: widget.initialMovement?.icon ?? Icons.receipt_long,
+        color: const Color(0xFF64748B),
+        type: MovementType.expense,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -171,7 +207,7 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
           if (_isExpense) ...[
             const SizedBox(height: 28),
             CategoryDropdown(
-              categories: widget.categories,
+              categories: _expenseCategories,
               value: _selectedCategory,
               onChanged: (value) => setState(() => _selectedCategory = value),
             ),

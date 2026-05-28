@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/formatters/currency_formatter.dart';
-import '../../../data/models/finance_category.dart';
+import '../../../data/models/category.dart';
 
 class CategoryExpenseList extends StatelessWidget {
   const CategoryExpenseList({
@@ -9,7 +9,7 @@ class CategoryExpenseList extends StatelessWidget {
     super.key,
   });
 
-  final List<FinanceCategory> categories;
+  final List<Category> categories;
 
   @override
   Widget build(BuildContext context) {

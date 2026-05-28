@@ -17,6 +17,7 @@ class StatisticsScreen extends ConsumerWidget {
     final financeState = ref.watch(financeControllerProvider);
     final summary = ref.watch(financialSummaryProvider);
     final movements = ref.watch(movementsProvider);
+    final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -34,7 +35,10 @@ class StatisticsScreen extends ConsumerWidget {
                 ],
                 const PeriodSelector(),
                 const SizedBox(height: AppSpacing.xl),
-                CategoryBreakdownSection(summary: summary),
+                CategoryBreakdownSection(
+                  summary: summary,
+                  categories: categories,
+                ),
                 const SizedBox(height: AppSpacing.xl),
                 const ExpenseEvolutionCard(),
               ],
