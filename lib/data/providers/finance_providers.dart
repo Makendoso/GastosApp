@@ -59,18 +59,60 @@ final financialSummaryProvider = Provider<FinancialSummary>((ref) {
   return ref.watch(financeControllerProvider).summary;
 });
 
+final statisticsPeriodProvider = StateProvider<StatisticsPeriod>((ref) {
+  return StatisticsPeriod.month;
+});
+
+final statisticsSummaryProvider = Provider<FinancialSummary>((ref) {
+  final movements = ref.watch(movementsProvider);
+  final range = _rangeFor(ref.watch(statisticsPeriodProvider), DateTime.now());
+  final expenseByCategory = <String, double>{};
+  var income = 0.0;
+  var expenses = 0.0;
+
+  for (final movement in movements) {
+    if (!_isWithinRange(movement.date, range.currentStart, range.currentEnd)) {
+      continue;
+    }
+
+    if (movement.isExpense) {
+      final amount = movement.amount.abs();
+      expenses += amount;
+      expenseByCategory.update(
+        movement.category,
+        (total) => total + amount,
+        ifAbsent: () => amount,
+      );
+    } else {
+      income += movement.amount.abs();
+    }
+  }
+
+  return FinancialSummary(
+    balance: income - expenses,
+    monthIncome: income,
+    monthExpenses: expenses,
+    expenseByCategory: expenseByCategory,
+    message: '',
+  );
+});
+
 final statisticsOverviewProvider = Provider<StatisticsOverview>((ref) {
   final movements = ref.watch(movementsProvider);
-  final summary = ref.watch(financialSummaryProvider);
+  final period = ref.watch(statisticsPeriodProvider);
+  final summary = ref.watch(statisticsSummaryProvider);
   final now = DateTime.now();
-  final previousMonth = DateTime(now.year, now.month - 1);
+  final range = _rangeFor(period, now);
 
-  final previousMonthExpenses = movements
+  final previousExpenses = movements
       .where(
         (movement) =>
             movement.isExpense &&
-            movement.date.year == previousMonth.year &&
-            movement.date.month == previousMonth.month,
+            _isWithinRange(
+              movement.date,
+              range.previousStart,
+              range.previousEnd,
+            ),
       )
       .fold(0.0, (total, movement) => total + movement.amount.abs());
 
@@ -81,42 +123,57 @@ final statisticsOverviewProvider = Provider<StatisticsOverview>((ref) {
           .first;
 
   return StatisticsOverview(
-    currentMonthExpenses: summary.monthExpenses,
-    previousMonthExpenses: previousMonthExpenses,
-    dailyAverage: now.day == 0 ? 0 : summary.monthExpenses / now.day,
+    period: period,
+    currentExpenses: summary.monthExpenses,
+    previousExpenses: previousExpenses,
+    dailyAverage: summary.monthExpenses / range.elapsedDays,
     topCategoryName: topCategoryEntry?.key,
     topCategoryAmount: topCategoryEntry?.value ?? 0,
+    elapsedDays: range.elapsedDays,
   );
 });
 
 final expenseEvolutionProvider = Provider<List<ExpenseEvolutionPoint>>((ref) {
   final movements = ref.watch(movementsProvider);
-  final now = DateTime.now();
-  final dailyExpenses = <int, double>{};
+  final period = ref.watch(statisticsPeriodProvider);
+  return buildExpenseEvolutionPoints(
+    movements: movements,
+    period: period,
+    now: DateTime.now(),
+  );
+});
+
+List<ExpenseEvolutionPoint> buildExpenseEvolutionPoints({
+  required List<Movement> movements,
+  required StatisticsPeriod period,
+  required DateTime now,
+}) {
+  final range = _rangeFor(period, now);
+  final expensesByBucket = <int, double>{};
 
   for (final movement in movements) {
     if (!movement.isExpense ||
-        movement.date.year != now.year ||
-        movement.date.month != now.month) {
+        !_isWithinRange(movement.date, range.currentStart, range.currentEnd)) {
       continue;
     }
 
-    dailyExpenses.update(
-      movement.date.day,
+    final bucket = _bucketFor(movement.date, period, range.currentStart);
+    expensesByBucket.update(
+      bucket,
       (total) => total + movement.amount.abs(),
       ifAbsent: () => movement.amount.abs(),
     );
   }
 
-  var runningTotal = 0.0;
   return [
-    for (var day = 1; day <= now.day; day++)
+    for (var bucket = 1; bucket <= range.bucketCount; bucket++)
       ExpenseEvolutionPoint(
-        day: day,
-        amount: runningTotal += dailyExpenses[day] ?? 0,
+        x: bucket,
+        label: _bucketLabel(bucket, period, range.currentStart),
+        amount: expensesByBucket[bucket] ?? 0,
       ),
   ];
-});
+}
 
 final historyFilterProvider = StateProvider<HistoryFilterState>((ref) {
   return const HistoryFilterState();
@@ -174,6 +231,209 @@ final filteredMovementsProvider = Provider<List<Movement>>((ref) {
 
 DateTime _dateOnly(DateTime date) {
   return DateTime(date.year, date.month, date.day);
+}
+
+StatisticsPeriodRange _rangeFor(StatisticsPeriod period, DateTime now) {
+  final today = _dateOnly(now);
+
+  switch (period) {
+    case StatisticsPeriod.week:
+      final start = today.subtract(Duration(days: today.weekday - 1));
+      final end = start.add(const Duration(days: 6));
+      return StatisticsPeriodRange(
+        currentStart: start,
+        currentEnd: end,
+        previousStart: start.subtract(const Duration(days: 7)),
+        previousEnd: end.subtract(const Duration(days: 7)),
+        bucketCount: 7,
+        elapsedDays: today.difference(start).inDays + 1,
+      );
+    case StatisticsPeriod.month:
+      final start = DateTime(today.year, today.month);
+      final end = DateTime(today.year, today.month + 1, 0);
+      final previousStart = DateTime(today.year, today.month - 1);
+      final previousEnd = DateTime(today.year, today.month, 0);
+      return StatisticsPeriodRange(
+        currentStart: start,
+        currentEnd: end,
+        previousStart: previousStart,
+        previousEnd: previousEnd,
+        bucketCount: today.day,
+        elapsedDays: today.day,
+      );
+    case StatisticsPeriod.year:
+      final start = DateTime(today.year);
+      final end = DateTime(today.year, 12, 31);
+      return StatisticsPeriodRange(
+        currentStart: start,
+        currentEnd: end,
+        previousStart: DateTime(today.year - 1),
+        previousEnd: DateTime(today.year - 1, 12, 31),
+        bucketCount: today.month,
+        elapsedDays: today.difference(start).inDays + 1,
+      );
+  }
+}
+
+bool _isWithinRange(DateTime date, DateTime start, DateTime end) {
+  final dateOnly = _dateOnly(date);
+  return !dateOnly.isBefore(start) && !dateOnly.isAfter(end);
+}
+
+int _bucketFor(DateTime date, StatisticsPeriod period, DateTime start) {
+  return switch (period) {
+    StatisticsPeriod.week => _dateOnly(date).difference(start).inDays + 1,
+    StatisticsPeriod.month => date.day,
+    StatisticsPeriod.year => date.month,
+  };
+}
+
+String _bucketLabel(int bucket, StatisticsPeriod period, DateTime start) {
+  return switch (period) {
+    StatisticsPeriod.week => const [
+        'Lun',
+        'Mar',
+        'Mie',
+        'Jue',
+        'Vie',
+        'Sab',
+        'Dom',
+      ][bucket - 1],
+    StatisticsPeriod.month => bucket.toString(),
+    StatisticsPeriod.year => const [
+        'Ene',
+        'Feb',
+        'Mar',
+        'Abr',
+        'May',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dic',
+      ][bucket - 1],
+  };
+}
+
+enum StatisticsPeriod {
+  week,
+  month,
+  year;
+
+  String get label {
+    return switch (this) {
+      StatisticsPeriod.week => 'Semana',
+      StatisticsPeriod.month => 'Mes',
+      StatisticsPeriod.year => 'Año',
+    };
+  }
+
+  String get title {
+    return switch (this) {
+      StatisticsPeriod.week => 'Resumen de la semana',
+      StatisticsPeriod.month => 'Resumen del mes',
+      StatisticsPeriod.year => 'Resumen del año',
+    };
+  }
+
+  String get currentLabel {
+    return switch (this) {
+      StatisticsPeriod.week => 'Semana actual',
+      StatisticsPeriod.month => 'Mes actual',
+      StatisticsPeriod.year => 'Año actual',
+    };
+  }
+
+  String get previousLabel {
+    return switch (this) {
+      StatisticsPeriod.week => 'Semana anterior',
+      StatisticsPeriod.month => 'Mes anterior',
+      StatisticsPeriod.year => 'Año anterior',
+    };
+  }
+
+  String get emptyEvolutionTitle {
+    return switch (this) {
+      StatisticsPeriod.week => 'Sin gastos esta semana',
+      StatisticsPeriod.month => 'Sin gastos este mes',
+      StatisticsPeriod.year => 'Sin gastos este año',
+    };
+  }
+
+  String get noCurrentExpensesInsight {
+    return switch (this) {
+      StatisticsPeriod.week =>
+        'Aun no hay gastos esta semana. Registra movimientos para ver tendencias.',
+      StatisticsPeriod.month =>
+        'Aun no hay gastos este mes. Registra movimientos para ver tendencias.',
+      StatisticsPeriod.year =>
+        'Aun no hay gastos este año. Registra movimientos para ver tendencias.',
+    };
+  }
+
+  String get noPreviousExpensesInsight {
+    return switch (this) {
+      StatisticsPeriod.week =>
+        'Esta semana ya tiene gastos registrados; la siguiente semana podras comparar mejor.',
+      StatisticsPeriod.month =>
+        'Este mes ya tiene gastos registrados; el siguiente mes podras comparar mejor.',
+      StatisticsPeriod.year =>
+        'Este año ya tiene gastos registrados; el siguiente año podras comparar mejor.',
+    };
+  }
+
+  String get higherInsight {
+    return switch (this) {
+      StatisticsPeriod.week =>
+        'Tus gastos van por encima de la semana anterior. Conviene revisar los rubros principales.',
+      StatisticsPeriod.month =>
+        'Tus gastos van por encima del mes anterior. Conviene revisar los rubros principales.',
+      StatisticsPeriod.year =>
+        'Tus gastos van por encima del año anterior. Conviene revisar los rubros principales.',
+    };
+  }
+
+  String get lowerInsight {
+    return switch (this) {
+      StatisticsPeriod.week =>
+        'Vas gastando menos que la semana anterior. Buen avance para mantener el ritmo.',
+      StatisticsPeriod.month =>
+        'Vas gastando menos que el mes anterior. Buen avance para mantener el ritmo.',
+      StatisticsPeriod.year =>
+        'Vas gastando menos que el año anterior. Buen avance para mantener el ritmo.',
+    };
+  }
+
+  String get equalInsight {
+    return switch (this) {
+      StatisticsPeriod.week =>
+        'Tus gastos van iguales a la semana anterior. Mantente atento a los proximos dias.',
+      StatisticsPeriod.month =>
+        'Tus gastos van iguales al mes anterior. Mantente atento a los proximos dias.',
+      StatisticsPeriod.year =>
+        'Tus gastos van iguales al año anterior. Mantente atento a los proximos meses.',
+    };
+  }
+}
+
+class StatisticsPeriodRange {
+  const StatisticsPeriodRange({
+    required this.currentStart,
+    required this.currentEnd,
+    required this.previousStart,
+    required this.previousEnd,
+    required this.bucketCount,
+    required this.elapsedDays,
+  });
+
+  final DateTime currentStart;
+  final DateTime currentEnd;
+  final DateTime previousStart;
+  final DateTime previousEnd;
+  final int bucketCount;
+  final int elapsedDays;
 }
 
 class HistoryFilterState {
@@ -309,53 +569,59 @@ class CategoryState {
 
 class StatisticsOverview {
   const StatisticsOverview({
-    required this.currentMonthExpenses,
-    required this.previousMonthExpenses,
+    required this.period,
+    required this.currentExpenses,
+    required this.previousExpenses,
     required this.dailyAverage,
     required this.topCategoryName,
     required this.topCategoryAmount,
+    required this.elapsedDays,
   });
 
-  final double currentMonthExpenses;
-  final double previousMonthExpenses;
+  final StatisticsPeriod period;
+  final double currentExpenses;
+  final double previousExpenses;
   final double dailyAverage;
   final String? topCategoryName;
   final double topCategoryAmount;
+  final int elapsedDays;
 
-  double get monthlyDifference => currentMonthExpenses - previousMonthExpenses;
+  double get difference => currentExpenses - previousExpenses;
 
-  bool get hasCurrentExpenses => currentMonthExpenses > 0;
+  bool get hasCurrentExpenses => currentExpenses > 0;
 
-  bool get hasPreviousExpenses => previousMonthExpenses > 0;
+  bool get hasPreviousExpenses => previousExpenses > 0;
 
   String get insight {
     if (!hasCurrentExpenses) {
-      return 'Aun no hay gastos este mes. Registra movimientos para ver tendencias.';
+      return period.noCurrentExpensesInsight;
     }
 
     if (!hasPreviousExpenses) {
-      return 'Este mes ya tiene gastos registrados; el siguiente mes podras comparar mejor.';
+      return period.noPreviousExpensesInsight;
     }
 
-    if (monthlyDifference > 0) {
-      return 'Tus gastos van por encima del mes anterior. Conviene revisar los rubros principales.';
+    if (difference > 0) {
+      return period.higherInsight;
     }
 
-    if (monthlyDifference < 0) {
-      return 'Vas gastando menos que el mes anterior. Buen avance para mantener el ritmo.';
+    if (difference < 0) {
+      return period.lowerInsight;
     }
 
-    return 'Tus gastos van iguales al mes anterior. Mantente atento a los proximos dias.';
+    return period.equalInsight;
   }
 }
 
 class ExpenseEvolutionPoint {
   const ExpenseEvolutionPoint({
-    required this.day,
+    required this.x,
+    required this.label,
     required this.amount,
   });
 
-  final int day;
+  final int x;
+  final String label;
   final double amount;
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_app/data/models/movement.dart';
+import 'package:mi_app/data/providers/finance_providers.dart';
 import 'package:mi_app/data/repositories/local_finance_repository.dart';
 import 'package:mi_app/data/services/finance_calculator.dart';
 import 'package:mi_app/data/services/finance_data_source.dart';
@@ -60,6 +61,45 @@ void main() {
       expect(summary.monthIncome, 5000);
       expect(summary.monthExpenses, 120);
       expect(summary.expenseByCategory, {'Comida': 120});
+    });
+  });
+
+  group('Statistics evolution', () {
+    test('shows real monthly expenses instead of accumulated values', () {
+      final points = buildExpenseEvolutionPoints(
+        period: StatisticsPeriod.year,
+        now: DateTime(2026, 5, 27),
+        movements: [
+          _movement(
+            id: 'march-expense',
+            amount: 1000,
+            type: MovementType.expense,
+            date: DateTime(2026, 3, 10),
+          ),
+          _movement(
+            id: 'april-expense',
+            amount: 100,
+            type: MovementType.expense,
+            date: DateTime(2026, 4, 10),
+          ),
+          _movement(
+            id: 'may-expense',
+            amount: 1500,
+            type: MovementType.expense,
+            date: DateTime(2026, 5, 10),
+          ),
+          _movement(
+            id: 'may-income',
+            amount: 8000,
+            type: MovementType.income,
+            date: DateTime(2026, 5, 10),
+          ),
+        ],
+      );
+
+      expect(points[2].amount, 1000);
+      expect(points[3].amount, 100);
+      expect(points[4].amount, 1500);
     });
   });
 

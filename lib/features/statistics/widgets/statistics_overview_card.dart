@@ -15,7 +15,7 @@ class StatisticsOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final difference = overview.monthlyDifference;
+    final difference = overview.difference;
     final differenceColor = difference > 0
         ? AppColors.expense
         : difference < 0
@@ -39,14 +39,14 @@ class StatisticsOverviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.insights_outlined, color: AppColors.primary),
-              SizedBox(width: AppSpacing.sm),
+              const Icon(Icons.insights_outlined, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Resumen del mes',
-                  style: TextStyle(
+                  overview.period.title,
+                  style: const TextStyle(
                     color: AppColors.text,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -61,17 +61,17 @@ class StatisticsOverviewCard extends StatelessWidget {
               final compact = constraints.maxWidth < 360;
               final cards = [
                 _MetricTile(
-                  label: 'Mes actual',
+                  label: overview.period.currentLabel,
                   value: CurrencyFormatter.format(
-                    overview.currentMonthExpenses,
+                    overview.currentExpenses,
                   ),
                   icon: Icons.calendar_today_outlined,
                   color: AppColors.expense,
                 ),
                 _MetricTile(
-                  label: 'Mes anterior',
+                  label: overview.period.previousLabel,
                   value: CurrencyFormatter.format(
-                    overview.previousMonthExpenses,
+                    overview.previousExpenses,
                   ),
                   icon: Icons.history_outlined,
                   color: AppColors.info,

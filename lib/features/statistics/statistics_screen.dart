@@ -17,9 +17,10 @@ class StatisticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final financeState = ref.watch(financeControllerProvider);
-    final summary = ref.watch(financialSummaryProvider);
+    final summary = ref.watch(statisticsSummaryProvider);
     final movements = ref.watch(movementsProvider);
     final categories = ref.watch(categoriesProvider);
+    final selectedPeriod = ref.watch(statisticsPeriodProvider);
     final overview = ref.watch(statisticsOverviewProvider);
     final evolution = ref.watch(expenseEvolutionProvider);
 
@@ -47,7 +48,7 @@ class StatisticsScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.lg),
                 ExpenseEvolutionCard(
                   points: evolution,
-                  month: DateTime.now(),
+                  period: selectedPeriod,
                 ),
               ],
             ),

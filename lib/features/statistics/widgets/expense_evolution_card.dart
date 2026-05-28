@@ -8,12 +8,12 @@ import '../../../data/providers/finance_providers.dart';
 class ExpenseEvolutionCard extends StatelessWidget {
   const ExpenseEvolutionCard({
     required this.points,
-    required this.month,
+    required this.period,
     super.key,
   });
 
   final List<ExpenseEvolutionPoint> points;
-  final DateTime month;
+  final StatisticsPeriod period;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class ExpenseEvolutionCard extends StatelessWidget {
     final maxY = _chartMaxY(maxAmount);
     final interval = maxY / 4;
     final spots = [
-      for (final point in points) FlSpot(point.day.toDouble(), point.amount),
+      for (final point in points) FlSpot(point.x.toDouble(), point.amount),
     ];
 
     return Container(
@@ -61,14 +61,14 @@ class ExpenseEvolutionCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (!hasExpenses)
-            const _EmptyEvolutionState()
+            _EmptyEvolutionState(period: period)
           else
             SizedBox(
               height: 205,
               child: LineChart(
                 LineChartData(
                   minX: 1,
-                  maxX: points.last.day.toDouble(),
+                  maxX: points.last.x.toDouble(),
                   minY: 0,
                   maxY: maxY,
                   gridData: FlGridData(
@@ -109,17 +109,17 @@ class ExpenseEvolutionCard extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: _dayInterval(points.last.day),
+                        interval: _labelInterval(period, points.last.x),
                         getTitlesWidget: (value, meta) {
-                          final day = value.toInt();
-                          if (day < 1 || day > points.last.day) {
+                          final index = value.toInt();
+                          if (index < 1 || index > points.length) {
                             return const SizedBox.shrink();
                           }
 
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              '$day ${_monthLabel(month.month)}',
+                              points[index - 1].label,
                               style: const TextStyle(
                                 color: AppColors.textMuted,
                                 fontSize: 12,
@@ -180,33 +180,20 @@ class ExpenseEvolutionCard extends StatelessWidget {
     return ((value / step).ceil() * step).toDouble();
   }
 
-  static double _dayInterval(int lastDay) {
-    if (lastDay <= 7) {
+  static double _labelInterval(StatisticsPeriod period, int lastX) {
+    if (period == StatisticsPeriod.week) {
       return 1;
     }
 
-    if (lastDay <= 14) {
+    if (period == StatisticsPeriod.year) {
+      return 1;
+    }
+
+    if (lastX <= 14) {
       return 3;
     }
 
     return 7;
-  }
-
-  static String _monthLabel(int month) {
-    return const [
-      'Ene',
-      'Feb',
-      'Mar',
-      'Abr',
-      'May',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dic',
-    ][month - 1];
   }
 
   static String _moneyLabel(double value) {
@@ -223,7 +210,9 @@ class ExpenseEvolutionCard extends StatelessWidget {
 }
 
 class _EmptyEvolutionState extends StatelessWidget {
-  const _EmptyEvolutionState();
+  const _EmptyEvolutionState({required this.period});
+
+  final StatisticsPeriod period;
 
   @override
   Widget build(BuildContext context) {
@@ -235,20 +224,20 @@ class _EmptyEvolutionState extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(Icons.show_chart, color: AppColors.textMuted, size: 34),
-          SizedBox(height: AppSpacing.sm),
+          const Icon(Icons.show_chart, color: AppColors.textMuted, size: 34),
+          const SizedBox(height: AppSpacing.sm),
           Text(
-            'Sin gastos este mes',
-            style: TextStyle(
+            period.emptyEvolutionTitle,
+            style: const TextStyle(
               color: AppColors.text,
               fontSize: 15,
               fontWeight: FontWeight.w800,
             ),
           ),
-          SizedBox(height: 4),
-          Text(
+          const SizedBox(height: 4),
+          const Text(
             'La evolucion aparecera cuando registres gastos.',
             textAlign: TextAlign.center,
             style: TextStyle(
