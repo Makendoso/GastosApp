@@ -29,11 +29,11 @@ class MonthlyBudgetCard extends ConsumerWidget {
     final status = _statusFor(progress, hasBudget, remaining);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -72,6 +72,8 @@ class MonthlyBudgetCard extends ConsumerWidget {
                     SizedBox(height: 2),
                     Text(
                       'Control de gastos del mes',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 13,
@@ -87,29 +89,48 @@ class MonthlyBudgetCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           if (!hasBudget) ...[
-            const Text(
-              'Aun no tienes un limite para este mes.',
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+            const _EmptyBudgetState(),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => _showBudgetDialog(context, ref, budget),
+                icon: const Icon(Icons.add),
+                label: const Text('Definir presupuesto'),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            FilledButton.icon(
-              onPressed: () => _showBudgetDialog(context, ref, budget),
-              icon: const Icon(Icons.add),
-              label: const Text('Definir presupuesto'),
-            ),
           ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${(progress * 100).toStringAsFixed(0)}% usado',
+                    style: TextStyle(
+                      color: status.color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(
+                  CurrencyFormatter.format(limit),
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
                 minHeight: 12,
                 value: progress,
-                backgroundColor: const Color(0xFFE5E7EB),
+                backgroundColor: AppColors.border,
                 valueColor: AlwaysStoppedAnimation<Color>(status.color),
               ),
             ),
@@ -142,7 +163,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
   _BudgetStatus _statusFor(double progress, bool hasBudget, double remaining) {
     if (!hasBudget) {
       return const _BudgetStatus(
-        color: AppColors.primary,
+        color: AppColors.info,
         icon: Icons.savings_outlined,
         message: 'Define un limite para medir tu avance mensual.',
       );
@@ -165,7 +186,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
     }
 
     return const _BudgetStatus(
-      color: AppColors.primary,
+      color: AppColors.info,
       icon: Icons.check_circle_outline,
       message: 'Vas dentro de tu presupuesto mensual.',
     );
@@ -237,7 +258,13 @@ class _BudgetDialogState extends ConsumerState<_BudgetDialog> {
 
       Navigator.of(context).pop();
       widget.messenger.showSnackBar(
-        const SnackBar(content: Text('Presupuesto actualizado.')),
+        SnackBar(
+          content: Text(
+            value <= 0
+                ? 'Presupuesto desactivado.'
+                : 'Presupuesto actualizado.',
+          ),
+        ),
       );
     } catch (_) {
       if (!mounted) {
@@ -282,6 +309,39 @@ class _BudgetDialogState extends ConsumerState<_BudgetDialog> {
           child: Text(_isSaving ? 'Guardando...' : 'Guardar'),
         ),
       ],
+    );
+  }
+}
+
+class _EmptyBudgetState extends StatelessWidget {
+  const _EmptyBudgetState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.info.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.info.withOpacity(0.14)),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.info_outline, color: AppColors.info, size: 22),
+          SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'Aun no tienes un limite para este mes.',
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

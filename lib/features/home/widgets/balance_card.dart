@@ -16,19 +16,19 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
-          colors: [Color(0xFF55D98A), Color(0xFF34B56B)],
+          colors: [Color(0xFF16A34A), AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.25),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withOpacity(0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -42,33 +42,110 @@ class BalanceCard extends StatelessWidget {
                 'Saldo actual',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              Icon(
-                Icons.visibility_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 36,
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: Colors.white.withOpacity(0.95),
+                  size: 25,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              CurrencyFormatter.format(summary.balance),
+              maxLines: 1,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 44,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _BalancePill(
+                label: 'Ingresos',
+                value: summary.income,
+                icon: Icons.trending_up,
+              ),
+              _BalancePill(
+                label: 'Gastos',
+                value: summary.expenses,
+                icon: Icons.trending_down,
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            CurrencyFormatter.format(summary.balance),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 42,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.white),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  summary.message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.md),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalancePill extends StatelessWidget {
+  const _BalancePill({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final double value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(0.16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 17),
+          const SizedBox(width: 6),
           Text(
-            '${summary.message} 👍',
+            '$label ${CurrencyFormatter.format(value)}',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

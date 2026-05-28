@@ -23,11 +23,11 @@ class SummaryCardsRow extends StatelessWidget {
             amount: summary.income,
             color: AppColors.income,
             icon: Icons.arrow_upward,
-            backgroundColor: const Color(0xFFEFF9FC),
-            indicatorColor: const Color(0xFFA8E9BB),
+            backgroundColor: const Color(0xFFEFFDF4),
+            indicatorColor: const Color(0xFFDCFCE7),
           ),
         ),
-        const SizedBox(width: AppSpacing.lg),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: SummaryCard(
             title: 'Gastos',

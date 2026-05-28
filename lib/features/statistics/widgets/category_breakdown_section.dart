@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/formatters/currency_formatter.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/category.dart';
 import '../../../data/models/financial_summary.dart';
 
@@ -19,49 +21,81 @@ class CategoryBreakdownSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = _itemsFrom(summary.expenseByCategory, categories);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Gastos por categoria',
-          style: TextStyle(
-            color: Color(0xFF111827),
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
-        ),
-        const SizedBox(height: 26),
-        if (items.isEmpty)
-          const Text(
-            'Registra gastos para ver el desglose.',
-            style: TextStyle(
-              color: Color(0xFF6B7280),
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          )
-        else
-          Row(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
             children: [
+              Icon(Icons.donut_small_outlined, color: AppColors.expense),
+              SizedBox(width: AppSpacing.sm),
               Expanded(
-                flex: 8,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: _DonutChart(items: items),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 9,
-                child: Column(
-                  children: [
-                    for (final item in items) _CategoryLegendRow(item: item),
-                  ],
+                child: Text(
+                  'Gastos por categoria',
+                  style: TextStyle(
+                    color: AppColors.text,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
           ),
-      ],
+          const SizedBox(height: AppSpacing.lg),
+          if (items.isEmpty)
+            const _EmptyStatsState()
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 360;
+
+                if (isCompact) {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 210,
+                        child: _DonutChart(items: items),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _CategoryLegend(items: items),
+                    ],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 8,
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: _DonutChart(items: items),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      flex: 9,
+                      child: _CategoryLegend(items: items),
+                    ),
+                  ],
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 
@@ -70,11 +104,11 @@ class CategoryBreakdownSection extends StatelessWidget {
     List<Category> categories,
   ) {
     const colors = [
-      Color(0xFFFF5147),
-      Color(0xFF13A982),
-      Color(0xFFFF974A),
-      Color(0xFF2BA5D6),
-      Color(0xFF9278DD),
+      Color(0xFFDC2626),
+      Color(0xFF2563EB),
+      Color(0xFFF59E0B),
+      Color(0xFF16A34A),
+      Color(0xFF7C3AED),
       Color(0xFF64748B),
     ];
     final total = expenseByCategory.values.fold(0.0, (sum, item) => sum + item);
@@ -119,8 +153,8 @@ class _DonutChart extends StatelessWidget {
       children: [
         PieChart(
           PieChartData(
-            centerSpaceRadius: 54,
-            sectionsSpace: 0,
+            centerSpaceRadius: 50,
+            sectionsSpace: 2,
             startDegreeOffset: -90,
             sections: [
               for (final item in items)
@@ -136,27 +170,46 @@ class _DonutChart extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              CurrencyFormatter.format(
-                items.fold(0.0, (sum, item) => sum + item.amount),
-              ),
-              style: const TextStyle(
-                color: Color(0xFF111827),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                CurrencyFormatter.format(
+                  items.fold(0.0, (sum, item) => sum + item.amount),
+                ),
+                maxLines: 1,
+                style: const TextStyle(
+                  color: AppColors.text,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
             const SizedBox(height: 2),
             const Text(
               'Total',
               style: TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+                color: AppColors.textMuted,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+class _CategoryLegend extends StatelessWidget {
+  const _CategoryLegend({required this.items});
+
+  final List<_CategoryExpense> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (final item in items) _CategoryLegendRow(item: item),
       ],
     );
   }
@@ -170,7 +223,7 @@ class _CategoryLegendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         children: [
           Container(
@@ -188,32 +241,80 @@ class _CategoryLegendRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: Color(0xFF111827),
+                color: AppColors.text,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                CurrencyFormatter.format(item.amount),
+                maxLines: 1,
+                style: const TextStyle(
+                  color: AppColors.text,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 34,
+            child: Text(
+              '${item.percent.toStringAsFixed(0)}%',
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: AppColors.textMuted,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyStatsState extends StatelessWidget {
+  const _EmptyStatsState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: const Column(
+        children: [
+          Icon(Icons.bar_chart_outlined, color: AppColors.textMuted, size: 34),
+          SizedBox(height: AppSpacing.sm),
           Text(
-            CurrencyFormatter.format(item.amount),
-            style: const TextStyle(
-              color: Color(0xFF111827),
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+            'Sin estadisticas todavia',
+            style: TextStyle(
+              color: AppColors.text,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 30,
-            child: Text(
-              '${item.percent.toStringAsFixed(0)}%',
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+          SizedBox(height: 4),
+          Text(
+            'Registra gastos para ver el desglose por categoria.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

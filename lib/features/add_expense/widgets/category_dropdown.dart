@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../data/models/category.dart';
 
 class CategoryDropdown extends StatelessWidget {
@@ -20,9 +21,9 @@ class CategoryDropdown extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _FieldLabel('Categoria'),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 72,
+        const SizedBox(height: 8),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 58),
           child: DropdownButtonFormField<String>(
             value: value,
             icon: const Icon(Icons.keyboard_arrow_down, size: 32),
@@ -31,10 +32,11 @@ class CategoryDropdown extends StatelessWidget {
               return DropdownMenuItem(
                 value: category.name,
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: 34,
+                      height: 34,
                       decoration: BoxDecoration(
                         color: category.color,
                         shape: BoxShape.circle,
@@ -42,16 +44,21 @@ class CategoryDropdown extends StatelessWidget {
                       child: Icon(
                         category.icon,
                         color: Colors.white,
-                        size: 24,
+                        size: 21,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Text(
-                      category.name,
-                      style: const TextStyle(
-                        color: Color(0xFF111827),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(width: 12),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 220),
+                      child: Text(
+                        category.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -65,11 +72,11 @@ class CategoryDropdown extends StatelessWidget {
             },
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 14,
+                horizontal: 16,
+                vertical: 12,
               ),
               enabledBorder: _border(),
-              focusedBorder: _border(color: const Color(0xFF34B56B)),
+              focusedBorder: _border(color: AppColors.primary),
             ),
           ),
         ),
@@ -77,7 +84,7 @@ class CategoryDropdown extends StatelessWidget {
     );
   }
 
-  OutlineInputBorder _border({Color color = const Color(0xFFDDE2E8)}) {
+  OutlineInputBorder _border({Color color = AppColors.border}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(color: color, width: 1.5),
@@ -95,8 +102,8 @@ class _FieldLabel extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        color: Color(0xFF111827),
-        fontSize: 19,
+        color: AppColors.text,
+        fontSize: 15,
         fontWeight: FontWeight.w700,
       ),
     );

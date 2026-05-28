@@ -19,20 +19,19 @@ class AddExpenseScreen extends ConsumerWidget {
     final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        toolbarHeight: 92,
-        leadingWidth: 88,
+        toolbarHeight: 72,
+        leadingWidth: 64,
         leading: IconButton(
           tooltip: 'Volver',
           onPressed: () => Navigator.maybePop(context),
-          icon: const Icon(Icons.chevron_left, size: 42),
+          icon: const Icon(Icons.chevron_left, size: 34),
         ),
         title: const Text(
           'Movimiento',
           style: TextStyle(
             color: Color(0xFF111827),
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
         ),

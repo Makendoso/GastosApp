@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/formatters/date_formatter.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/category.dart';
 import '../../../data/models/movement.dart';
 import 'category_dropdown.dart';
@@ -167,13 +169,13 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
     return Form(
       key: _formKey,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+        padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
         children: [
           MovementTypeSelector(
             isExpense: _isExpense,
             onChanged: (value) => setState(() => _isExpense = value),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.lg),
           ExpenseTextField(
             controller: _titleController,
             label: 'Titulo',
@@ -186,7 +188,7 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
               return null;
             },
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           ExpenseTextField(
             controller: _amountController,
             label: 'Monto',
@@ -205,25 +207,25 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
             },
           ),
           if (_isExpense) ...[
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSpacing.lg),
             CategoryDropdown(
               categories: _expenseCategories,
               value: _selectedCategory,
               onChanged: (value) => setState(() => _selectedCategory = value),
             ),
           ],
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           DatePickerTile(
             dateText: DateFormatter.short(_selectedDate),
             onTap: _pickDate,
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           ExpenseTextField(
             controller: _noteController,
             label: 'Nota (opcional)',
             hintText: 'Ej. Almuerzo con amigos',
           ),
-          const SizedBox(height: 38),
+          const SizedBox(height: AppSpacing.xl),
           SaveExpenseButton(
             onPressed: _isSaving ? null : _saveExpense,
             label: _isSaving ? 'Guardando...' : 'Guardar',
@@ -247,10 +249,11 @@ class MovementTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 72,
+      height: 58,
       decoration: BoxDecoration(
-        color: const Color(0xFFF3FAF7),
-        borderRadius: BorderRadius.circular(36),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
@@ -302,8 +305,8 @@ class _MovementTypeOption extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         height: double.infinity,
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.14) : Colors.transparent,
-          borderRadius: BorderRadius.circular(36),
+          color: isSelected ? color.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -312,18 +315,22 @@ class _MovementTypeOption extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: color.withOpacity(isSelected ? 1 : 0.35),
+                color: color.withOpacity(isSelected ? 1 : 0.16),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.white, size: 26),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : color,
+                size: 22,
+              ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
             Text(
               label,
-              style: const TextStyle(
-                color: Color(0xFF111827),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+              style: TextStyle(
+                color: isSelected ? color : AppColors.text,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],

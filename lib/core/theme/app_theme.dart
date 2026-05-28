@@ -12,10 +12,10 @@ abstract final class AppTheme {
         primary: AppColors.primary,
         surface: AppColors.surface,
       ),
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: AppColors.surface,
       appBarTheme: const AppBarTheme(
         centerTitle: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         foregroundColor: Colors.black87,
         elevation: 0,
       ),
@@ -29,7 +29,20 @@ abstract final class AppTheme {
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
         border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF111827),
+        contentTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),

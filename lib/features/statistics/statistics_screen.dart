@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/providers/finance_providers.dart';
 import '../shared/widgets/app_bottom_navigation.dart';
@@ -20,26 +21,25 @@ class StatisticsScreen extends ConsumerWidget {
     final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       bottomNavigationBar: const AppBottomNavigation(selectedIndex: 2),
       body: financeState.isLoading && movements.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.fromLTRB(22, 42, 22, 24),
+              padding: const EdgeInsets.fromLTRB(18, 34, 18, 20),
               children: [
                 const StatisticsHeader(),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.lg),
                 if (financeState.errorMessage != null) ...[
                   _StatisticsMessage(message: financeState.errorMessage!),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
                 const PeriodSelector(),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.lg),
                 CategoryBreakdownSection(
                   summary: summary,
                   categories: categories,
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.lg),
                 const ExpenseEvolutionCard(),
               ],
             ),
@@ -56,15 +56,16 @@ class _StatisticsMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF1F6),
+        color: AppColors.expense.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.expense.withOpacity(0.12)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Text(
           message,
           style: const TextStyle(
-            color: Color(0xFFFF3B64),
+            color: AppColors.expense,
             fontWeight: FontWeight.w600,
           ),
         ),

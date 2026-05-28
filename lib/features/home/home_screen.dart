@@ -22,20 +22,18 @@ class HomeScreen extends ConsumerWidget {
     final budget = ref.watch(monthlyBudgetProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        toolbarHeight: 88,
+        toolbarHeight: 72,
         leading: IconButton(
           tooltip: 'Menu',
           onPressed: () {},
-          icon: const Icon(Icons.menu, size: 36),
+          icon: const Icon(Icons.menu, size: 30),
         ),
         actions: [
-          const SizedBox(width: AppSpacing.md),
           IconButton(
             tooltip: 'Notificaciones',
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none, size: 34),
+            icon: const Icon(Icons.notifications_none, size: 28),
           ),
           const SizedBox(width: AppSpacing.md),
         ],
@@ -49,27 +47,27 @@ class HomeScreen extends ConsumerWidget {
                   icon: Icons.error_outline,
                 )
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(22, 0, 22, 24),
+                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
                   children: [
                     const HomeHeader(userName: 'Andres'),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: AppSpacing.lg),
                     if (financeState.errorMessage != null) ...[
                       _InlineError(message: financeState.errorMessage!),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
                     BalanceCard(summary: summary),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: AppSpacing.lg),
                     SummaryCardsRow(summary: summary),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     if (budgetState.errorMessage != null) ...[
                       _InlineError(message: budgetState.errorMessage!),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
                     MonthlyBudgetCard(
                       budget: budget,
                       summary: summary,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     RecentMovementsSection(
                       movements: financeState.recentMovements,
                     ),

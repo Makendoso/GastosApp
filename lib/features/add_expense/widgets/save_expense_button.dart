@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class SaveExpenseButton extends StatelessWidget {
   const SaveExpenseButton({
     required this.onPressed,
@@ -14,11 +16,11 @@ class SaveExpenseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 64,
+      height: 56,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2FB86A),
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -28,7 +30,7 @@ class SaveExpenseButton extends StatelessWidget {
         child: Text(
           label,
           style: const TextStyle(
-            fontSize: 19,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
         ),
