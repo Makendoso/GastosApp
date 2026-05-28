@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../../data/models/finance_category.dart';
+import '../../../data/models/category.dart';
 
 class CategoryExpenseChart extends StatelessWidget {
   const CategoryExpenseChart({
@@ -9,7 +9,7 @@ class CategoryExpenseChart extends StatelessWidget {
     super.key,
   });
 
-  final List<FinanceCategory> categories;
+  final List<Category> categories;
 
   @override
   Widget build(BuildContext context) {

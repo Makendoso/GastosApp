@@ -41,9 +41,7 @@ class AddExpenseScreen extends ConsumerWidget {
       bottomNavigationBar: const AppBottomNavigation(selectedIndex: 1),
       body: AddExpenseForm(
         initialMovement: movement,
-        categories: categories.map((category) {
-          return category.name;
-        }).toList(),
+        categories: categories,
         onSave: (movement) async {
           final controller = ref.read(financeControllerProvider.notifier);
 

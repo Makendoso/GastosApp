@@ -6,6 +6,7 @@ import '../../data/providers/finance_providers.dart';
 import '../shared/widgets/app_bottom_navigation.dart';
 import 'widgets/balance_card.dart';
 import 'widgets/home_header.dart';
+import 'widgets/monthly_budget_card.dart';
 import 'widgets/recent_movements_section.dart';
 import 'widgets/summary_cards_row.dart';
 
@@ -17,6 +18,8 @@ class HomeScreen extends ConsumerWidget {
     final financeState = ref.watch(financeControllerProvider);
     final summary = ref.watch(financialSummaryProvider);
     final movements = ref.watch(movementsProvider);
+    final budgetState = ref.watch(budgetControllerProvider);
+    final budget = ref.watch(monthlyBudgetProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -57,6 +60,15 @@ class HomeScreen extends ConsumerWidget {
                     BalanceCard(summary: summary),
                     const SizedBox(height: 30),
                     SummaryCardsRow(summary: summary),
+                    const SizedBox(height: 24),
+                    if (budgetState.errorMessage != null) ...[
+                      _InlineError(message: budgetState.errorMessage!),
+                      const SizedBox(height: 16),
+                    ],
+                    MonthlyBudgetCard(
+                      budget: budget,
+                      summary: summary,
+                    ),
                     const SizedBox(height: 32),
                     RecentMovementsSection(
                       movements: financeState.recentMovements,

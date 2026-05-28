@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/models/category.dart';
+
 class CategoryDropdown extends StatelessWidget {
   const CategoryDropdown({
     required this.categories,
@@ -8,7 +10,7 @@ class CategoryDropdown extends StatelessWidget {
     super.key,
   });
 
-  final List<String> categories;
+  final List<Category> categories;
   final String value;
   final ValueChanged<String> onChanged;
 
@@ -27,25 +29,25 @@ class CategoryDropdown extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             items: categories.map((category) {
               return DropdownMenuItem(
-                value: category,
+                value: category.name,
                 child: Row(
                   children: [
                     Container(
                       width: 38,
                       height: 38,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF8547),
+                      decoration: BoxDecoration(
+                        color: category.color,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.restaurant,
+                      child: Icon(
+                        category.icon,
                         color: Colors.white,
                         size: 24,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Text(
-                      category,
+                      category.name,
                       style: const TextStyle(
                         color: Color(0xFF111827),
                         fontSize: 22,

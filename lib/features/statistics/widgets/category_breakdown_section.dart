@@ -2,19 +2,22 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/formatters/currency_formatter.dart';
+import '../../../data/models/category.dart';
 import '../../../data/models/financial_summary.dart';
 
 class CategoryBreakdownSection extends StatelessWidget {
   const CategoryBreakdownSection({
     required this.summary,
+    required this.categories,
     super.key,
   });
 
   final FinancialSummary summary;
+  final List<Category> categories;
 
   @override
   Widget build(BuildContext context) {
-    final items = _itemsFrom(summary.expenseByCategory);
+    final items = _itemsFrom(summary.expenseByCategory, categories);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +65,10 @@ class CategoryBreakdownSection extends StatelessWidget {
     );
   }
 
-  List<_CategoryExpense> _itemsFrom(Map<String, double> expenseByCategory) {
+  List<_CategoryExpense> _itemsFrom(
+    Map<String, double> expenseByCategory,
+    List<Category> categories,
+  ) {
     const colors = [
       Color(0xFFFF5147),
       Color(0xFF13A982),
@@ -81,9 +87,23 @@ class CategoryBreakdownSection extends StatelessWidget {
           entries[index].key,
           entries[index].value,
           total == 0 ? 0 : (entries[index].value / total) * 100,
-          colors[index % colors.length],
+          _colorFor(entries[index].key, categories) ??
+              colors[index % colors.length],
         ),
     ];
+  }
+
+  Color? _colorFor(String categoryName, List<Category> categories) {
+    final normalizedName = categoryName.toLowerCase();
+
+    for (final category in categories) {
+      if (category.name.toLowerCase() == normalizedName ||
+          category.id.toLowerCase() == normalizedName) {
+        return category.color;
+      }
+    }
+
+    return null;
   }
 }
 
