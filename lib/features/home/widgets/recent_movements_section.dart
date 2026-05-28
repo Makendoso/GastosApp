@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/movement.dart';
 import '../../shared/widgets/movement_tile.dart';
+import 'home_section_title.dart';
 
 class RecentMovementsSection extends StatelessWidget {
   const RecentMovementsSection({
@@ -19,38 +20,19 @@ class RecentMovementsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Ultimos movimientos',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.text,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
-            ),
-            if (movements.isNotEmpty)
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushNamed(context, AppRoutes.history),
-                child: const Text(
-                  'Ver todos',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-          ],
+        HomeSectionTitle(
+          title: 'Ultimos movimientos',
+          actionLabel: movements.isNotEmpty ? 'Ver todos' : null,
+          onAction: movements.isNotEmpty
+              ? () => Navigator.pushNamed(context, AppRoutes.history)
+              : null,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.xs),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(

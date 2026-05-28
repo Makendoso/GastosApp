@@ -28,11 +28,13 @@ class MonthlyBudgetCard extends ConsumerWidget {
     final remaining = hasBudget ? limit - spent : 0.0;
     final status = _statusFor(progress, hasBudget, remaining);
 
-    return Container(
-      padding: const EdgeInsets.all(18),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
@@ -52,11 +54,11 @@ class MonthlyBudgetCard extends ConsumerWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: status.color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(status.icon, color: status.color),
               ),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.sm),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +67,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
                       'Presupuesto mensual',
                       style: TextStyle(
                         color: Color(0xFF111827),
-                        fontSize: 18,
+                        fontSize: 17,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -89,10 +91,10 @@ class MonthlyBudgetCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           if (!hasBudget) ...[
             const _EmptyBudgetState(),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -152,7 +154,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             _BudgetStatusMessage(status: status),
           ],
         ],

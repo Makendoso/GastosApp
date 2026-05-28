@@ -18,12 +18,19 @@ class BalanceCard extends StatelessWidget {
     final hasMovements = summary.income > 0 || summary.expenses > 0;
     final status = _statusFor(summary.balance, hasMovements);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+    final isNegative = summary.balance < 0;
+    final colors = isNegative
+        ? const [Color(0xFFDC2626), Color(0xFF991B1B)]
+        : const [Color(0xFF16A34A), AppColors.primary];
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF16A34A), AppColors.primary],
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: colors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -64,7 +71,7 @@ class BalanceCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -73,21 +80,12 @@ class BalanceCard extends StatelessWidget {
               maxLines: 1,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 44,
+                fontSize: 42,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Resumen de este mes',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.82),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Icon(status.icon, color: Colors.white, size: 22),

@@ -9,6 +9,7 @@ import 'widgets/home_header.dart';
 import 'widgets/monthly_budget_card.dart';
 import 'widgets/recent_movements_section.dart';
 import 'widgets/summary_cards_row.dart';
+import 'widgets/weekly_chart.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -23,19 +24,19 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 72,
+        toolbarHeight: 64,
         leading: IconButton(
           tooltip: 'Menu',
           onPressed: () {},
-          icon: const Icon(Icons.menu, size: 30),
+          icon: const Icon(Icons.menu, size: 28),
         ),
         actions: [
           IconButton(
             tooltip: 'Notificaciones',
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none, size: 28),
+            icon: const Icon(Icons.notifications_none, size: 26),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
       bottomNavigationBar: const AppBottomNavigation(selectedIndex: 0),
@@ -47,18 +48,22 @@ class HomeScreen extends ConsumerWidget {
                   icon: Icons.error_outline,
                 )
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   children: [
                     const HomeHeader(userName: 'Andres'),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
                     if (financeState.errorMessage != null) ...[
                       _InlineError(message: financeState.errorMessage!),
                       const SizedBox(height: AppSpacing.md),
                     ],
                     BalanceCard(summary: summary),
-                    const SizedBox(height: AppSpacing.lg),
-                    SummaryCardsRow(summary: summary),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
+                    SummaryCardsRow(
+                      summary: summary,
+                      budget: budget,
+                      movements: movements,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     if (budgetState.errorMessage != null) ...[
                       _InlineError(message: budgetState.errorMessage!),
                       const SizedBox(height: AppSpacing.md),
@@ -67,7 +72,9 @@ class HomeScreen extends ConsumerWidget {
                       budget: budget,
                       summary: summary,
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.md),
+                    WeeklyChart(movements: movements),
+                    const SizedBox(height: AppSpacing.md),
                     RecentMovementsSection(
                       movements: financeState.recentMovements,
                     ),

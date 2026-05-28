@@ -103,7 +103,7 @@ class FinanceState {
   final bool isProcessing;
   final String? errorMessage;
 
-  List<Movement> get recentMovements => movements.take(4).toList();
+  List<Movement> get recentMovements => movements.take(5).toList();
 
   FinanceState copyWith({
     List<Movement>? movements,
