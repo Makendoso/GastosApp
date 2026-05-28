@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/formatters/date_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/movement.dart';
 import '../../add_expense/add_expense_screen.dart';
@@ -32,12 +33,23 @@ class MovementHistoryList extends StatelessWidget {
       );
     }
 
+    final items = _groupMovements(movements);
+
     return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      itemCount: movements.length,
-      separatorBuilder: (_, __) => const Divider(height: AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, AppSpacing.md),
+      itemCount: items.length,
+      separatorBuilder: (_, index) {
+        return items[index].isHeader || items[index + 1].isHeader
+            ? const SizedBox(height: 2)
+            : const Divider(height: 1);
+      },
       itemBuilder: (context, index) {
-        final movement = movements[index];
+        final item = items[index];
+        if (item.date != null) {
+          return _DateHeader(date: item.date!);
+        }
+
+        final movement = item.movement!;
 
         return Dismissible(
           key: ValueKey(movement.id),
@@ -76,24 +88,50 @@ class MovementHistoryList extends StatelessWidget {
             ),
             child: const Icon(Icons.delete_outline, color: Colors.white),
           ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => AddExpenseScreen(movement: movement),
-                ),
-              );
-            },
-            child: MovementTile(
-              movement,
-              showDate: true,
+          child: SizedBox(
+            width: double.infinity,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => AddExpenseScreen(movement: movement),
+                  ),
+                );
+              },
+              child: MovementTile(
+                movement,
+                showDate: false,
+                fullWidth: true,
+              ),
             ),
           ),
         );
       },
     );
+  }
+
+  List<_HistoryItem> _groupMovements(List<Movement> movements) {
+    final items = <_HistoryItem>[];
+    DateTime? currentDate;
+
+    for (final movement in movements) {
+      final movementDate = DateTime(
+        movement.date.year,
+        movement.date.month,
+        movement.date.day,
+      );
+
+      if (currentDate == null || currentDate != movementDate) {
+        currentDate = movementDate;
+        items.add(_HistoryItem.header(movementDate));
+      }
+
+      items.add(_HistoryItem.movement(movement));
+    }
+
+    return items;
   }
 
   Future<bool?> _confirmDelete(BuildContext context) {
@@ -117,4 +155,61 @@ class MovementHistoryList extends StatelessWidget {
       },
     );
   }
+}
+
+class _DateHeader extends StatelessWidget {
+  const _DateHeader({required this.date});
+
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: 2),
+      child: Text(
+        _labelFor(date),
+        style: const TextStyle(
+          color: Color(0xFF111827),
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  String _labelFor(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+
+    if (target == today) {
+      return 'Hoy';
+    }
+
+    if (target == today.subtract(const Duration(days: 1))) {
+      return 'Ayer';
+    }
+
+    return DateFormatter.short(date);
+  }
+}
+
+class _HistoryItem {
+  const _HistoryItem._({
+    this.date,
+    this.movement,
+  });
+
+  factory _HistoryItem.header(DateTime date) {
+    return _HistoryItem._(date: date);
+  }
+
+  factory _HistoryItem.movement(Movement movement) {
+    return _HistoryItem._(movement: movement);
+  }
+
+  final DateTime? date;
+  final Movement? movement;
+
+  bool get isHeader => date != null;
 }

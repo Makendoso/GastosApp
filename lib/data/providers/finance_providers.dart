@@ -59,6 +59,106 @@ final financialSummaryProvider = Provider<FinancialSummary>((ref) {
   return ref.watch(financeControllerProvider).summary;
 });
 
+final historyFilterProvider = StateProvider<HistoryFilterState>((ref) {
+  return const HistoryFilterState();
+});
+
+final filteredMovementsProvider = Provider<List<Movement>>((ref) {
+  final movements = ref.watch(movementsProvider);
+  final categories = ref.watch(categoriesProvider);
+  final filter = ref.watch(historyFilterProvider);
+
+  return movements.where((movement) {
+    if (filter.type != null && movement.type != filter.type) {
+      return false;
+    }
+
+    if (filter.categoryId != null) {
+      final selectedCategory = categories.where(
+        (category) => category.id == filter.categoryId,
+      );
+      if (selectedCategory.isEmpty ||
+          movement.category != selectedCategory.first.name) {
+        return false;
+      }
+    }
+
+    final movementDate = _dateOnly(movement.date);
+    final startDate =
+        filter.startDate == null ? null : _dateOnly(filter.startDate!);
+    final endDate = filter.endDate == null ? null : _dateOnly(filter.endDate!);
+
+    if (startDate != null && movementDate.isBefore(startDate)) {
+      return false;
+    }
+
+    if (endDate != null && movementDate.isAfter(endDate)) {
+      return false;
+    }
+
+    final query = filter.query.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      final searchableText = [
+        movement.title,
+        movement.category,
+        movement.note ?? '',
+      ].join(' ').toLowerCase();
+
+      if (!searchableText.contains(query)) {
+        return false;
+      }
+    }
+
+    return true;
+  }).toList(growable: false);
+});
+
+DateTime _dateOnly(DateTime date) {
+  return DateTime(date.year, date.month, date.day);
+}
+
+class HistoryFilterState {
+  const HistoryFilterState({
+    this.query = '',
+    this.type,
+    this.categoryId,
+    this.startDate,
+    this.endDate,
+  });
+
+  final String query;
+  final MovementType? type;
+  final String? categoryId;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  bool get hasFilters =>
+      query.trim().isNotEmpty ||
+      type != null ||
+      categoryId != null ||
+      startDate != null ||
+      endDate != null;
+
+  HistoryFilterState copyWith({
+    String? query,
+    MovementType? type,
+    String? categoryId,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool clearType = false,
+    bool clearCategory = false,
+    bool clearDates = false,
+  }) {
+    return HistoryFilterState(
+      query: query ?? this.query,
+      type: clearType ? null : type ?? this.type,
+      categoryId: clearCategory ? null : categoryId ?? this.categoryId,
+      startDate: clearDates ? null : startDate ?? this.startDate,
+      endDate: clearDates ? null : endDate ?? this.endDate,
+    );
+  }
+}
+
 class BudgetState {
   const BudgetState({
     required this.budget,
