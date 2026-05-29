@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/formatters/currency_formatter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/financial_summary.dart';
 import '../../../data/models/monthly_budget.dart';
-import '../../../data/providers/finance_providers.dart';
 
-class MonthlyBudgetCard extends ConsumerWidget {
+class MonthlyBudgetCard extends StatelessWidget {
   const MonthlyBudgetCard({
     required this.budget,
     required this.summary,
@@ -20,7 +17,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
   final FinancialSummary summary;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final spent = summary.monthExpenses;
     final limit = budget.limit;
     final hasBudget = budget.isConfigured;
@@ -85,24 +82,11 @@ class MonthlyBudgetCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () => _showBudgetDialog(context, ref, budget),
-                child: Text(hasBudget ? 'Editar' : 'Crear'),
-              ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           if (!hasBudget) ...[
             const _EmptyBudgetState(),
-            const SizedBox(height: AppSpacing.sm),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => _showBudgetDialog(context, ref, budget),
-                icon: const Icon(Icons.add),
-                label: const Text('Definir presupuesto'),
-              ),
-            ),
           ] else ...[
             Row(
               children: [
@@ -191,126 +175,6 @@ class MonthlyBudgetCard extends ConsumerWidget {
       color: AppColors.info,
       icon: Icons.check_circle_outline,
       message: 'Vas dentro de tu presupuesto mensual.',
-    );
-  }
-
-  Future<void> _showBudgetDialog(
-    BuildContext context,
-    WidgetRef ref,
-    MonthlyBudget budget,
-  ) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    await showDialog<void>(
-      context: context,
-      builder: (_) => _BudgetDialog(
-        budget: budget,
-        messenger: messenger,
-      ),
-    );
-  }
-}
-
-class _BudgetDialog extends ConsumerStatefulWidget {
-  const _BudgetDialog({
-    required this.budget,
-    required this.messenger,
-  });
-
-  final MonthlyBudget budget;
-  final ScaffoldMessengerState messenger;
-
-  @override
-  ConsumerState<_BudgetDialog> createState() => _BudgetDialogState();
-}
-
-class _BudgetDialogState extends ConsumerState<_BudgetDialog> {
-  late final TextEditingController _controller;
-  bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(
-      text:
-          widget.budget.limit > 0 ? widget.budget.limit.toStringAsFixed(2) : '',
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (_isSaving) {
-      return;
-    }
-
-    final value = double.tryParse(_controller.text.trim()) ?? 0;
-    setState(() => _isSaving = true);
-
-    try {
-      await ref.read(budgetControllerProvider.notifier).saveBudget(value);
-
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.of(context).pop();
-      widget.messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            value <= 0
-                ? 'Presupuesto desactivado.'
-                : 'Presupuesto actualizado.',
-          ),
-        ),
-      );
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() => _isSaving = false);
-      final error = ref.read(budgetControllerProvider).errorMessage;
-      widget.messenger.showSnackBar(
-        SnackBar(
-          content: Text(error ?? 'No se pudo guardar el presupuesto.'),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Presupuesto mensual'),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        enabled: !_isSaving,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-        ],
-        decoration: const InputDecoration(
-          labelText: 'Limite del mes',
-          prefixText: '\$ ',
-          helperText: 'Usa 0 para dejarlo sin presupuesto.',
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        FilledButton(
-          onPressed: _isSaving ? null : _save,
-          child: Text(_isSaving ? 'Guardando...' : 'Guardar'),
-        ),
-      ],
     );
   }
 }

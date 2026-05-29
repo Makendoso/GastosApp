@@ -178,6 +178,15 @@ class AppDatabase extends _$AppDatabase {
     return (delete(categories)..where((table) => table.id.equals(id))).go();
   }
 
+  Future<void> clearAppData() async {
+    await transaction(() async {
+      await delete(movements).go();
+      await customStatement('DELETE FROM monthly_budgets');
+      await delete(categories).go();
+      await seedDefaultCategories();
+    });
+  }
+
   Future<void> seedDefaultCategories() async {
     await batch((batch) {
       batch.insertAllOnConflictUpdate(

@@ -55,4 +55,8 @@ class LocalFinanceService
   Future<void> saveMonthlyBudget(MonthlyBudget budget) {
     return _database.saveMonthlyBudget(budget);
   }
+
+  Future<void> clearAppData() {
+    return _database.clearAppData();
+  }
 }

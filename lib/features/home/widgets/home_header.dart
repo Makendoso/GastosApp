@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({
-    required this.userName,
-    super.key,
-  });
-
-  final String userName;
+  const HomeHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +11,7 @@ class HomeHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hola, $userName 👋',
+          'Tu dinero bajo control',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: const Color(0xFF111827),
                 fontWeight: FontWeight.w600,

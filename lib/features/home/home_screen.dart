@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
 import '../../data/providers/finance_providers.dart';
+import '../settings/settings_screen.dart';
 import '../shared/widgets/app_bottom_navigation.dart';
 import 'widgets/balance_card.dart';
 import 'widgets/home_header.dart';
@@ -23,12 +24,21 @@ class HomeScreen extends ConsumerWidget {
     final budget = ref.watch(monthlyBudgetProvider);
 
     return Scaffold(
+      drawer: const Drawer(
+        child: SafeArea(
+          child: SettingsPanel(),
+        ),
+      ),
       appBar: AppBar(
         toolbarHeight: 64,
-        leading: IconButton(
-          tooltip: 'Menu',
-          onPressed: () {},
-          icon: const Icon(Icons.menu, size: 28),
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              tooltip: 'Menu',
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              icon: const Icon(Icons.menu, size: 28),
+            );
+          },
         ),
         actions: [
           IconButton(
@@ -52,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
               : ListView(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   children: [
-                    const HomeHeader(userName: 'Andres'),
+                    const HomeHeader(),
                     const SizedBox(height: AppSpacing.md),
                     if (financeState.errorMessage != null) ...[
                       _InlineError(message: financeState.errorMessage!),

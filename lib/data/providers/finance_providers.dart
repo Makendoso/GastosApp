@@ -28,6 +28,10 @@ final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
   return LocalBudgetRepository(ref.watch(localFinanceServiceProvider));
 });
 
+final appMaintenanceProvider = Provider<AppMaintenanceService>((ref) {
+  return AppMaintenanceService(ref.watch(localFinanceServiceProvider));
+});
+
 final budgetControllerProvider =
     StateNotifierProvider<BudgetController, BudgetState>((ref) {
   return BudgetController(ref.watch(budgetRepositoryProvider));
@@ -625,6 +629,16 @@ class ExpenseEvolutionPoint {
   final double amount;
 }
 
+class AppMaintenanceService {
+  const AppMaintenanceService(this._service);
+
+  final LocalFinanceService _service;
+
+  Future<void> clearAppData() {
+    return _service.clearAppData();
+  }
+}
+
 class CategoryController extends StateNotifier<CategoryState> {
   CategoryController(this._repository)
       : super(
@@ -756,7 +770,7 @@ class FinanceController extends StateNotifier<FinanceState> {
             isLoading: true,
           ),
         ) {
-    _load();
+    load();
   }
 
   final FinanceRepository _repository;
@@ -773,7 +787,7 @@ class FinanceController extends StateNotifier<FinanceState> {
     await _runAction(() => _repository.deleteMovement(id));
   }
 
-  Future<void> _load() async {
+  Future<void> load() async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
@@ -797,7 +811,7 @@ class FinanceController extends StateNotifier<FinanceState> {
 
     try {
       await action();
-      await _load();
+      await load();
     } catch (error) {
       state = state.copyWith(
         isProcessing: false,
