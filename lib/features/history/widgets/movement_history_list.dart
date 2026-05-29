@@ -76,7 +76,7 @@ class MovementHistoryList extends StatelessWidget {
             }
 
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Movimiento eliminado')),
+              const SnackBar(content: Text('Movimiento eliminado.')),
             );
           },
           background: Container(
@@ -88,22 +88,26 @@ class MovementHistoryList extends StatelessWidget {
             ),
             child: const Icon(Icons.delete_outline, color: Colors.white),
           ),
-          child: SizedBox(
-            width: double.infinity,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => AddExpenseScreen(movement: movement),
-                  ),
-                );
-              },
-              child: MovementTile(
-                movement,
-                showDate: false,
-                fullWidth: true,
+          child: Semantics(
+            button: true,
+            label: 'Editar movimiento ${movement.title}',
+            child: SizedBox(
+              width: double.infinity,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => AddExpenseScreen(movement: movement),
+                    ),
+                  );
+                },
+                child: MovementTile(
+                  movement,
+                  showDate: false,
+                  fullWidth: true,
+                ),
               ),
             ),
           ),

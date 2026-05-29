@@ -235,18 +235,20 @@ class _BudgetDialogState extends ConsumerState<_BudgetDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Presupuesto mensual'),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        enabled: !_isSaving,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-        ],
-        decoration: const InputDecoration(
-          labelText: 'Limite del mes',
-          prefixText: '\$ ',
-          helperText: 'Usa 0 para dejarlo sin presupuesto.',
+      content: SingleChildScrollView(
+        child: TextField(
+          controller: _controller,
+          autofocus: true,
+          enabled: !_isSaving,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          ],
+          decoration: const InputDecoration(
+            labelText: 'Limite del mes',
+            prefixText: '\$ ',
+            helperText: 'Usa 0 para dejarlo sin presupuesto.',
+          ),
         ),
       ),
       actions: [
@@ -334,25 +336,27 @@ class _ClearDataDialogState extends ConsumerState<_ClearDataDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Limpiar datos'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Esta accion borrara movimientos, presupuesto y categorias '
-            'configuradas. Escribe BORRAR para confirmar.',
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextField(
-            controller: _controller,
-            enabled: !_isClearing,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
-              labelText: 'Confirmacion',
-              border: OutlineInputBorder(),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Esta accion borrara movimientos, presupuesto y categorias '
+              'configuradas. Escribe BORRAR para confirmar.',
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _controller,
+              enabled: !_isClearing,
+              textCapitalization: TextCapitalization.characters,
+              decoration: const InputDecoration(
+                labelText: 'Confirmacion',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -502,14 +506,21 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundColor: category.color.withOpacity(0.12),
-        foregroundColor: category.color,
-        child: Icon(category.icon),
+    return Semantics(
+      label: 'Categoria ${category.name}',
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: CircleAvatar(
+          backgroundColor: category.color.withOpacity(0.12),
+          foregroundColor: category.color,
+          child: Icon(category.icon),
+        ),
+        title: Text(
+          category.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
-      title: Text(category.name),
     );
   }
 }

@@ -22,12 +22,17 @@ class PeriodSelector extends ConsumerWidget {
         children: [
           for (final period in StatisticsPeriod.values)
             Expanded(
-              child: _PeriodOption(
-                period: period,
-                isSelected: selectedPeriod == period,
-                onTap: () {
-                  ref.read(statisticsPeriodProvider.notifier).state = period;
-                },
+              child: Semantics(
+                button: true,
+                selected: selectedPeriod == period,
+                label: 'Periodo ${period.label}',
+                child: _PeriodOption(
+                  period: period,
+                  isSelected: selectedPeriod == period,
+                  onTap: () {
+                    ref.read(statisticsPeriodProvider.notifier).state = period;
+                  },
+                ),
               ),
             ),
         ],
@@ -58,22 +63,24 @@ class _PeriodOption extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
           alignment: Alignment.center,
-          height: double.infinity,
+          constraints: const BoxConstraints(minHeight: 46),
           margin: const EdgeInsets.symmetric(horizontal: 1),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.info : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(
-            period.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : AppColors.text,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              height: 1,
+          child: ExcludeSemantics(
+            child: Text(
+              period.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isSelected ? Colors.white : AppColors.text,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
             ),
           ),
         ),

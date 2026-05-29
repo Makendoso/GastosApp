@@ -167,7 +167,7 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
 
     final movementLabel = _isExpense ? 'Gasto' : 'Ingreso';
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$movementLabel guardado')),
+      SnackBar(content: Text('$movementLabel guardado.')),
     );
     Navigator.pop(context);
   }
@@ -213,7 +213,7 @@ class _AddExpenseFormState extends State<AddExpenseForm> {
 
     final amount = _parseAmount(cleanValue);
     if (amount == null) {
-      return 'Monto inválido';
+      return 'Monto invalido';
     }
 
     if (amount <= 0) {
@@ -280,6 +280,9 @@ class _AmountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final amountFontSize =
+        MediaQuery.textScalerOf(context).scale(42) > 52 ? 34.0 : 42.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -294,22 +297,22 @@ class _AmountField extends StatelessWidget {
             FilteringTextInputFormatter.allow(RegExp(r'[0-9\.,]')),
           ],
           validator: validator,
-          style: const TextStyle(
-            color: Color(0xFF111827),
-            fontSize: 42,
+          style: TextStyle(
+            color: const Color(0xFF111827),
+            fontSize: amountFontSize,
             fontWeight: FontWeight.w800,
           ),
           decoration: InputDecoration(
             hintText: '0.00',
             prefixText: r'$ ',
-            prefixStyle: const TextStyle(
-              color: Color(0xFF111827),
-              fontSize: 42,
+            prefixStyle: TextStyle(
+              color: const Color(0xFF111827),
+              fontSize: amountFontSize,
               fontWeight: FontWeight.w800,
             ),
-            hintStyle: const TextStyle(
-              color: Color(0xFFD1D5DB),
-              fontSize: 42,
+            hintStyle: TextStyle(
+              color: const Color(0xFFD1D5DB),
+              fontSize: amountFontSize,
               fontWeight: FontWeight.w800,
             ),
             contentPadding: const EdgeInsets.symmetric(
@@ -353,7 +356,7 @@ class MovementTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 68,
+      constraints: const BoxConstraints(minHeight: 68),
       decoration: BoxDecoration(
         color: const Color(0xFFF3FAF7),
         borderRadius: BorderRadius.circular(34),
@@ -401,41 +404,48 @@ class _MovementTypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(34),
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.14) : Colors.transparent,
-          borderRadius: BorderRadius.circular(34),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: color.withOpacity(isSelected ? 1 : 0.35),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFF111827),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(34),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 68),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withOpacity(0.14) : Colors.transparent,
+            borderRadius: BorderRadius.circular(34),
+          ),
+          child: ExcludeSemantics(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(isSelected ? 1 : 0.35),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF111827),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

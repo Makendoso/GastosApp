@@ -27,33 +27,46 @@ class AppBottomNavigation extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _BottomNavItem(
-                icon: Icons.home_outlined,
-                selectedIcon: Icons.home,
-                label: 'Inicio',
-                isSelected: selectedIndex == 0,
-                onTap: selectedIndex == 0
-                    ? null
-                    : () =>
-                        Navigator.popUntil(context, (route) => route.isFirst),
+              Expanded(
+                child: _BottomNavItem(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home,
+                  label: 'Inicio',
+                  semanticLabel: 'Ir al inicio',
+                  isSelected: selectedIndex == 0,
+                  onTap: selectedIndex == 0
+                      ? null
+                      : () => Navigator.popUntil(
+                            context,
+                            (route) => route.isFirst,
+                          ),
+                ),
               ),
-              _BottomNavItem(
-                icon: Icons.add_circle_outline,
-                selectedIcon: Icons.add_circle,
-                label: 'Agregar',
-                isSelected: selectedIndex == 1,
-                onTap: selectedIndex == 1
-                    ? null
-                    : () => Navigator.pushNamed(context, AppRoutes.addExpense),
+              Expanded(
+                child: _BottomNavItem(
+                  icon: Icons.add_circle_outline,
+                  selectedIcon: Icons.add_circle,
+                  label: 'Agregar',
+                  semanticLabel: 'Agregar movimiento',
+                  isSelected: selectedIndex == 1,
+                  onTap: selectedIndex == 1
+                      ? null
+                      : () =>
+                          Navigator.pushNamed(context, AppRoutes.addExpense),
+                ),
               ),
-              _BottomNavItem(
-                icon: Icons.bar_chart_outlined,
-                selectedIcon: Icons.bar_chart,
-                label: 'Estadisticas',
-                isSelected: selectedIndex == 2,
-                onTap: selectedIndex == 2
-                    ? null
-                    : () => Navigator.pushNamed(context, AppRoutes.statistics),
+              Expanded(
+                child: _BottomNavItem(
+                  icon: Icons.bar_chart_outlined,
+                  selectedIcon: Icons.bar_chart,
+                  label: 'Estadisticas',
+                  semanticLabel: 'Ver estadisticas',
+                  isSelected: selectedIndex == 2,
+                  onTap: selectedIndex == 2
+                      ? null
+                      : () =>
+                          Navigator.pushNamed(context, AppRoutes.statistics),
+                ),
               ),
             ],
           ),
@@ -68,6 +81,7 @@ class _BottomNavItem extends StatelessWidget {
     required this.icon,
     required this.selectedIcon,
     required this.label,
+    required this.semanticLabel,
     required this.isSelected,
     this.onTap,
   });
@@ -75,6 +89,7 @@ class _BottomNavItem extends StatelessWidget {
   final IconData icon;
   final IconData selectedIcon;
   final String label;
+  final String semanticLabel;
   final bool isSelected;
   final VoidCallback? onTap;
 
@@ -82,27 +97,34 @@ class _BottomNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isSelected ? AppColors.primary : const Color(0xFF374151);
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: SizedBox(
-        width: 110,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(isSelected ? selectedIcon : icon, color: color, size: 32),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              ),
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: semanticLabel,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Center(
+          child: ExcludeSemantics(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(isSelected ? selectedIcon : icon, color: color, size: 32),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

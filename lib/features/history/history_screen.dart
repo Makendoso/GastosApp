@@ -126,124 +126,126 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Filtros',
-                      style: TextStyle(
-                        color: AppColors.text,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _TypeFilter(
-                      value: draft.type,
-                      onChanged: (value) {
-                        setSheetState(() {
-                          draft = draft.copyWith(
-                            type: value,
-                            clearType: value == null,
-                          );
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    DropdownButtonFormField<String>(
-                      value: draft.categoryId,
-                      decoration: const InputDecoration(
-                        labelText: 'Categoria',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text('Todas'),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Filtros',
+                        style: TextStyle(
+                          color: AppColors.text,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
                         ),
-                        for (final category in categories)
-                          DropdownMenuItem(
-                            value: category.id,
-                            child: Text(category.name),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _TypeFilter(
+                        value: draft.type,
+                        onChanged: (value) {
+                          setSheetState(() {
+                            draft = draft.copyWith(
+                              type: value,
+                              clearType: value == null,
+                            );
+                          });
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      DropdownButtonFormField<String>(
+                        value: draft.categoryId,
+                        decoration: const InputDecoration(
+                          labelText: 'Categoria',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('Todas'),
                           ),
-                      ],
-                      onChanged: (value) {
-                        setSheetState(() {
-                          draft = draft.copyWith(
-                            categoryId: value,
-                            clearCategory: value == null,
-                          );
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _DateFilterButton(
-                            label: 'Desde',
-                            date: draft.startDate,
-                            onTap: () async {
-                              final date = await _pickFilterDate(
-                                context,
-                                draft.startDate,
-                              );
-                              if (date == null) {
-                                return;
-                              }
+                          for (final category in categories)
+                            DropdownMenuItem(
+                              value: category.id,
+                              child: Text(category.name),
+                            ),
+                        ],
+                        onChanged: (value) {
+                          setSheetState(() {
+                            draft = draft.copyWith(
+                              categoryId: value,
+                              clearCategory: value == null,
+                            );
+                          });
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _DateFilterButton(
+                              label: 'Desde',
+                              date: draft.startDate,
+                              onTap: () async {
+                                final date = await _pickFilterDate(
+                                  context,
+                                  draft.startDate,
+                                );
+                                if (date == null) {
+                                  return;
+                                }
+                                setSheetState(() {
+                                  draft = draft.copyWith(startDate: date);
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: _DateFilterButton(
+                              label: 'Hasta',
+                              date: draft.endDate,
+                              onTap: () async {
+                                final date = await _pickFilterDate(
+                                  context,
+                                  draft.endDate,
+                                );
+                                if (date == null) {
+                                  return;
+                                }
+                                setSheetState(() {
+                                  draft = draft.copyWith(endDate: date);
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () {
                               setSheetState(() {
-                                draft = draft.copyWith(startDate: date);
+                                draft = HistoryFilterState(query: draft.query);
                               });
                             },
+                            child: const Text('Limpiar'),
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: _DateFilterButton(
-                            label: 'Hasta',
-                            date: draft.endDate,
-                            onTap: () async {
-                              final date = await _pickFilterDate(
-                                context,
-                                draft.endDate,
-                              );
-                              if (date == null) {
-                                return;
-                              }
-                              setSheetState(() {
-                                draft = draft.copyWith(endDate: date);
-                              });
+                          const Spacer(),
+                          FilledButton(
+                            onPressed: () {
+                              ref.read(historyFilterProvider.notifier).state =
+                                  draft;
+                              Navigator.pop(context);
                             },
+                            child: const Text('Aplicar'),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Row(
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            setSheetState(() {
-                              draft = HistoryFilterState(query: draft.query);
-                            });
-                          },
-                          child: const Text('Limpiar'),
-                        ),
-                        const Spacer(),
-                        FilledButton(
-                          onPressed: () {
-                            ref.read(historyFilterProvider.notifier).state =
-                                draft;
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Aplicar'),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -357,7 +359,14 @@ class _DateFilterButton extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: onTap,
       icon: const Icon(Icons.event),
-      label: Text(date == null ? label : DateFormatter.short(date!)),
+      label: Text(
+        date == null ? label : DateFormatter.short(date!),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
     );
   }
 }

@@ -12,6 +12,8 @@ class HomeHeader extends StatelessWidget {
       children: [
         Text(
           'Tu dinero bajo control',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: const Color(0xFF111827),
                 fontWeight: FontWeight.w600,
@@ -21,6 +23,8 @@ class HomeHeader extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           'Aqui tienes el resumen de tus finanzas.',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w500,
